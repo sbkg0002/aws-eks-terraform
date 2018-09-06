@@ -25,6 +25,8 @@ data "aws_vpc" "active_vpc" {
 }
 
 data "aws_subnet_ids" "trusted" {
+  vpc_id = "${data.aws_vpc.active_vpc.id}"
+
   tags {
     owner = "aws-team"
     Zone  = "trusted"
