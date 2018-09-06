@@ -44,7 +44,7 @@ resource "aws_iam_instance_profile" "eks-demo-cluster-node" {
 resource "aws_security_group" "eks-demo-cluster-node" {
   name        = "terraform-eks-eks-demo-cluster-node"
   description = "Security group for all nodes in the cluster"
-  vpc_id      = "${aws_vpc.eks-demo-cluster.id}"
+  vpc_id      = "${data.aws_vpc.active_vpc.id}"
 
   egress {
     from_port   = 0
@@ -79,16 +79,6 @@ resource "aws_security_group_rule" "eks-demo-cluster-node-ingress-cluster" {
   source_security_group_id = "${aws_security_group.eks-demo-cluster-cluster.id}"
   to_port                  = 65535
   type                     = "ingress"
-}
-
-data "aws_ami" "eks-worker" {
-  filter {
-    name   = "name"
-    values = ["eks-worker-*"]
-  }
-
-  most_recent = true
-  owners      = ["602401143452"] # Amazon
 }
 
 locals {
@@ -136,7 +126,7 @@ resource "aws_autoscaling_group" "eks-demo-cluster" {
   max_size             = 2
   min_size             = 1
   name                 = "terraform-eks-eks-demo-cluster"
-  vpc_zone_identifier  = ["${aws_subnet.eks-demo-cluster.*.id}"]
+  vpc_zone_identifier  = ["${data.aws_subnet_ids.trusted.*.id}"]
 
   tag {
     key                 = "Name"
